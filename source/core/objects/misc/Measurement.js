@@ -27,9 +27,13 @@ function Measurement()
 	geometry.setAttribute("position", new Float32BufferAttribute([0, 0, 0, 1, 0, 0], 3));
 	this.line = new Line(geometry, new LineBasicMaterial({color: 0xFFFF00}));
 	this.line.frustumCulled = false;
+	this.line.locked = true;
+	this.line.name = "line";
 	this.add(this.line);
 
 	this.label = new TextSprite();
+	this.label.name = "label";
+	this.label.locked = true;
 	this.label.sizeAttenuation = false;
 	this.label.color = "#000000";
 	this.label.font = "arial";
@@ -38,7 +42,7 @@ function Measurement()
 	this.label.material.depthTest = false;
 	this.label.material.depthWrite = false;
 	this.label.material.needsUpdate = true;
-	this.label.scale.setScalar(0.1);
+	this.label.scale.setScalar(0.03);
 	this.add(this.label);
 
 	this.updateGeometry();
