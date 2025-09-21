@@ -31,13 +31,14 @@ function Measurement()
 
 	this.label = new TextSprite();
 	this.label.sizeAttenuation = false;
-	this.label.color = "#FFFF00";
-	this.label.outlineColor = "#000000";
-	this.label.outlineWidth = 2;
+	this.label.color = "#000000";
+	this.label.font = "arial";
+	this.label.resolution = 128;
+	this.label.outline = false;
 	this.label.material.depthTest = false;
 	this.label.material.depthWrite = false;
 	this.label.material.needsUpdate = true;
-	this.label.scale.setScalar(0.5);
+	this.label.scale.setScalar(0.1);
 	this.add(this.label);
 
 	this.updateGeometry();

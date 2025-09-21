@@ -220,6 +220,7 @@ TextMesh.prototype.toJSON = function(meta)
 	this.geometry = undefined;
 
 	var font = this.font;
+
 	var data = Object3D.prototype.toJSON.call(this, meta, function(meta, object)
 	{
 		font = font.toJSON(meta);
