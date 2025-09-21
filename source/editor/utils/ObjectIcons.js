@@ -73,6 +73,7 @@ ObjectIcons.icons = new Map([
 	["CubeCamera", ObjectIcons.path + "misc/probe.png"],
 	["Bone", ObjectIcons.path + "misc/bone.png"],
 	["Group", ObjectIcons.path + "misc/container.png"],
+	["Measurement", ObjectIcons.path + "misc/ruler.png"],
 	["BillboardGroup", ObjectIcons.path + "misc/rotate.png"],
 	["LensFlare", ObjectIcons.path + "misc/flare.png"],
 	["OrbitControls", ObjectIcons.path + "misc/orbit.png"],

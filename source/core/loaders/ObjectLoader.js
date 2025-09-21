@@ -12,6 +12,7 @@ import {InstancedMesh} from "../objects/mesh/InstancedMesh.js";
 import {LensFlare} from "../objects/misc/LensFlare.js";
 import {LightProbe} from "../objects/lights/LightProbe.js";
 import {Mesh} from "../objects/mesh/Mesh.js";
+import {Measurement} from "../objects/misc/Measurement.js";
 import {OrbitControls} from "../objects/controls/OrbitControls.js";
 import {OrthographicCamera} from "../objects/cameras/OrthographicCamera.js";
 import {ParticleEmitter} from "../objects/particle/ParticleEmitter.js";
@@ -882,6 +883,10 @@ ObjectLoader.prototype.parseObject = function(data)
 
 		case "Sprite":
 			object = new Sprite(this.getMaterial(data.material));
+			break;
+
+		case "Measurement":
+			object = Measurement.fromJSON(data);
 			break;
 
 		case "Group":

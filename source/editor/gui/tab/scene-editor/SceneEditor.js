@@ -1,4 +1,4 @@
-import {AxesHelper, Bone, BoxHelper, BufferGeometry, Camera, CameraHelper, DirectionalLight, DirectionalLightHelper, Geometry, HemisphereLight, HemisphereLightHelper, Light, LightProbe, Line, LineBasicMaterial, Material, Mesh, MeshStandardMaterial, Object3D, PointLight, PointLightHelper, Points, PointsMaterial, Raycaster, RectAreaLight, Scene, ShaderMaterial, SkinnedMesh, SpotLight, SpotLightHelper, Sprite, SpriteMaterial, Texture, Vector2} from "three";
+import {AxesHelper, Bone, BoxHelper, BufferGeometry, Camera, CameraHelper, DirectionalLight, DirectionalLightHelper, Float32BufferAttribute, Geometry, HemisphereLight, HemisphereLightHelper, Light, LightProbe, Line, LineBasicMaterial, Material, Mesh, MeshStandardMaterial, Object3D, Plane, PointLight, PointLightHelper, Points, PointsMaterial, Raycaster, RectAreaLight, Scene, ShaderMaterial, SkinnedMesh, SpotLight, SpotLightHelper, Sprite, SpriteMaterial, Texture, Vector2, Vector3} from "three";
 import {ActionBundle} from "../../../history/action/ActionBundle.js";
 import {AddResourceAction} from "../../../history/action/resources/AddResourceAction.js";
 import {Audio} from "../../../../core/resources/Audio.js";
@@ -27,6 +27,7 @@ import {ObjectIcons} from "../../../utils/ObjectIcons.js";
 import {OrthographicCamera} from "../../../../core/objects/cameras/OrthographicCamera.js";
 import {PerspectiveCamera} from "../../../../core/objects/cameras/PerspectiveCamera.js";
 import {PhysicsObject} from "../../../../core/objects/physics/PhysicsObject.js";
+import {Measurement} from "../../../../core/objects/misc/Measurement.js";
 import {RendererCanvas} from "../../../components/RendererCanvas.js";
 import {Settings} from "../../../Settings.js";
 import {SpineAnimation} from "../../../../core/objects/spine/SpineAnimation.js";
@@ -431,6 +432,47 @@ function SceneEditor(parent, closeable, container, index)
 	this.helperScene.add(this.objectHelper);
 
 	/**
+	 * Temporary preview line while selecting measurement points.
+	 *
+	 * @attribute measurementPreview
+	 * @type {Line}
+	 */
+	var measurementPreviewGeometry = new BufferGeometry();
+	measurementPreviewGeometry.setAttribute("position", new Float32BufferAttribute([0, 0, 0, 0, 0, 0], 3));
+	var measurementPreviewMaterial = new LineBasicMaterial({color: 0xFFFF00, depthTest: false, depthWrite: false, transparent: true, opacity: 0.75});
+	this.measurementPreview = new Line(measurementPreviewGeometry, measurementPreviewMaterial);
+	this.measurementPreview.visible = false;
+	this.measurementPreview.frustumCulled = false;
+	this.measurementPreview.matrixAutoUpdate = false;
+	this.measurementPreview.matrix.identity();
+	this.measurementPreview.matrixWorld.identity();
+	this.helperScene.add(this.measurementPreview);
+
+	/**
+	 * Measurement points collected while using the measurement tool.
+	 *
+	 * @attribute measurementPoints
+	 * @type {Array}
+	 */
+	this.measurementPoints = [];
+
+	/**
+	 * Plane used to pick measurement points when nothing is intersected.
+	 *
+	 * @attribute measurementPlane
+	 * @type {Plane}
+	 */
+	this.measurementPlane = new Plane(new Vector3(0, 1, 0), 0);
+
+	/**
+	 * Temporary vector reused when calculating measurement intersections.
+	 *
+	 * @attribute measurementIntersection
+	 * @type {Vector3}
+	 */
+	this.measurementIntersection = new Vector3();
+
+	/**
 	 * Group where the object manipulation tools are drawn
 	 *
 	 * @attribute toolScene
@@ -635,10 +677,14 @@ function SceneEditor(parent, closeable, container, index)
 				{
 					self.selectTool(SceneEditor.SCALE);
 				}
-				else if (key === Keyboard.NUM4)
-				{
-					self.selectTool(SceneEditor.ROTATE);
-				}
+                                else if (key === Keyboard.NUM4)
+                                {
+                                        self.selectTool(SceneEditor.ROTATE);
+                                }
+                                else if (key === Keyboard.NUM5)
+                                {
+                                        self.selectTool(SceneEditor.MEASURE);
+                                }
 				else if (key === Keyboard.F)
 				{
 					self.focusObject();
@@ -669,6 +715,7 @@ SceneEditor.SELECT = 0;
 SceneEditor.MOVE = 100;
 SceneEditor.SCALE = 101;
 SceneEditor.ROTATE = 102;
+SceneEditor.MEASURE = 103;
 
 SceneEditor.prototype = Object.create(TabComponent.prototype);
 
@@ -855,29 +902,67 @@ SceneEditor.prototype.update = function()
 	var isEditingObject = this.transform.update();
 
 	// Check if mouse is inside canvas
-	if (this.mouse.insideCanvas())
-	{
-		// Update selection
-		if (this.mode === SceneEditor.SELECT)
-		{
-			if (this.mouse.buttonJustPressed(Mouse.LEFT))
-			{
-				this.selectObjectWithMouse();
-			}
-		}
-		else
-		{
-			// If mouse double clicked select object
-			if (this.mouse.buttonDoubleClicked(Mouse.LEFT))
-			{
-				this.selectObjectWithMouse();
-			}	
-		}
+        if (this.mouse.insideCanvas())
+        {
+                if (this.mode === SceneEditor.MEASURE)
+                {
+                        this.measurementPlane.constant = -this.gridHelper.position.y;
+                        this.updateRaycasterFromMouse();
 
-		// Lock mouse when camera is moving
-		if (Editor.settings.editor.lockMouse && Nunu.runningOnDesktop())
-		{
-			if (!isEditingObject && (this.mouse.buttonJustPressed(Mouse.LEFT) || this.mouse.buttonJustPressed(Mouse.RIGHT) || this.mouse.buttonJustPressed(Mouse.MIDDLE)))
+                        var hoverPoint = this.getMeasurementPoint();
+
+                        if (this.mouse.buttonJustPressed(Mouse.RIGHT))
+                        {
+                                this.measurementPoints.length = 0;
+                        	this.measurementPreview.visible = false;
+                        }
+
+                        if (this.measurementPoints.length === 1 && hoverPoint !== null)
+                        {
+                                this.updateMeasurementPreview(this.measurementPoints[0], hoverPoint);
+                        }
+                        else
+                        {
+                        	this.measurementPreview.visible = false;
+                        }
+
+                        if (hoverPoint !== null && this.mouse.buttonJustPressed(Mouse.LEFT))
+                        {
+                                this.measurementPoints.push(hoverPoint.clone());
+
+                                if (this.measurementPoints.length === 2)
+                                {
+                                        this.createMeasurement(this.measurementPoints[0], this.measurementPoints[1]);
+                                        this.measurementPoints.length = 0;
+                                	this.measurementPreview.visible = false;
+                                }
+                        }
+
+                        if (this.mouse.buttonDoubleClicked(Mouse.LEFT))
+                        {
+                                this.selectObjectWithMouse();
+                        }
+                }
+                else if (this.mode === SceneEditor.SELECT)
+                {
+                        if (this.mouse.buttonJustPressed(Mouse.LEFT))
+                        {
+                                this.selectObjectWithMouse();
+                        }
+                }
+                else
+                {
+                        // If mouse double clicked select object
+                        if (this.mouse.buttonDoubleClicked(Mouse.LEFT))
+                        {
+                                this.selectObjectWithMouse();
+                        }
+                }
+
+                // Lock mouse when camera is moving
+                if (Editor.settings.editor.lockMouse && Nunu.runningOnDesktop())
+                {
+                        if (!isEditingObject && (this.mouse.buttonJustPressed(Mouse.LEFT) || this.mouse.buttonJustPressed(Mouse.RIGHT) || this.mouse.buttonJustPressed(Mouse.MIDDLE)))
 			{
 				this.mouse.setLock(true);
 			}
@@ -921,8 +1006,52 @@ SceneEditor.prototype.update = function()
 		});
 	}
 
-	this.render();
+        this.render();
 
+};
+
+SceneEditor.prototype.updateMeasurementPreview = function(start, end)
+{
+        var position = this.measurementPreview.geometry.attributes.position;
+        position.setXYZ(0, start.x, start.y, start.z);
+        position.setXYZ(1, end.x, end.y, end.z);
+        position.needsUpdate = true;
+        this.measurementPreview.geometry.computeBoundingSphere();
+        this.measurementPreview.visible = true;
+};
+
+SceneEditor.prototype.getMeasurementPoint = function()
+{
+        if (this.scene === null)
+        {
+                return null;
+        }
+
+        var intersects = this.raycaster.intersectObjects(this.scene.children, true);
+
+        if (intersects.length > 0)
+        {
+                return intersects[0].point.clone();
+        }
+
+        if (this.raycaster.ray.intersectPlane(this.measurementPlane, this.measurementIntersection) !== null)
+        {
+                return this.measurementIntersection.clone();
+        }
+
+        return null;
+};
+
+SceneEditor.prototype.createMeasurement = function(start, end)
+{
+        if (this.scene === null)
+        {
+                return;
+        }
+
+        var measurement = new Measurement();
+        measurement.setPoints(start, end);
+        Editor.addObject(measurement, this.scene);
 };
 
 /**
@@ -1165,32 +1294,56 @@ SceneEditor.prototype.setCameraMode = function(mode)
  * @param {number} tool Tool to select.
  */
 SceneEditor.prototype.selectTool = function(tool)
-{	
-	if (tool !== undefined)
-	{
-		this.mode = tool;
-	}
+{
+        var previousMode = this.mode;
 
-	if (this.mode === SceneEditor.MOVE)
-	{
-		this.transform.setMode(TransformControls.TRANSLATE);
-		this.transform.space = Editor.settings.editor.transformationSpace;
-	}
-	else if (this.mode === SceneEditor.SCALE)
-	{
-		this.transform.setMode(TransformControls.SCALE);
-	}
-	else if (this.mode === SceneEditor.ROTATE)
-	{
-		this.transform.setMode(TransformControls.ROTATE);
-		this.transform.space = Editor.settings.editor.transformationSpace;
-	}
-	else if (this.mode === SceneEditor.SELECT)
-	{
-		this.transform.setMode(TransformControls.NONE);
-	}
+        if (tool !== undefined)
+        {
+                this.mode = tool;
+        }
 
-	this.toolBar.selectTool(tool);
+        if (this.mode === SceneEditor.MOVE)
+        {
+                this.transform.setMode(TransformControls.TRANSLATE);
+                this.transform.space = Editor.settings.editor.transformationSpace;
+        }
+        else if (this.mode === SceneEditor.SCALE)
+        {
+                this.transform.setMode(TransformControls.SCALE);
+        }
+        else if (this.mode === SceneEditor.ROTATE)
+        {
+                this.transform.setMode(TransformControls.ROTATE);
+                this.transform.space = Editor.settings.editor.transformationSpace;
+        }
+        else if (this.mode === SceneEditor.SELECT)
+        {
+                this.transform.setMode(TransformControls.NONE);
+        }
+        else if (this.mode === SceneEditor.MEASURE)
+        {
+                this.transform.setMode(TransformControls.NONE);
+                this.measurementPoints.length = 0;
+                this.measurementPreview.visible = false;
+
+                if (tool === SceneEditor.MEASURE)
+                {
+                        Editor.alert(Locale.selectMeasurementPoints);
+                }
+        }
+        else
+        {
+                this.measurementPoints.length = 0;
+                this.measurementPreview.visible = false;
+        }
+
+        if (previousMode === SceneEditor.MEASURE && this.mode !== SceneEditor.MEASURE)
+        {
+                this.measurementPoints.length = 0;
+                this.measurementPreview.visible = false;
+        }
+
+        this.toolBar.selectTool(this.mode);
 };
 
 /**
