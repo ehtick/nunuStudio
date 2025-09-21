@@ -409,6 +409,15 @@
             "fors": {},
             "namespaces": {}
         },
+        "source\\core\\objects\\misc\\Measurement.js": {
+            "name": "source\\core\\objects\\misc\\Measurement.js",
+            "modules": {},
+            "classes": {
+                "Measurement": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
         "source\\core\\objects\\misc\\Sky.js": {
             "name": "source\\core\\objects\\misc\\Sky.js",
             "modules": {
@@ -1371,13 +1380,14 @@
                 "Group": 1,
                 "CubeCamera": 1,
                 "HTMLView": 1,
-                "LensFlare": 1
+                "LensFlare": 1,
+                "Measurement": 1
             },
             "fors": {},
             "namespaces": {},
             "tag": "module",
-            "file": "source\\core\\objects\\misc\\LensFlare.js",
-            "line": 5,
+            "file": "source\\core\\objects\\misc\\Measurement.js",
+            "line": 4,
             "description": "Groups are used to group objects together.\n\nThey are not drawn in the scene are just used as logic containers."
         },
         "Cameras": {
@@ -2108,7 +2118,7 @@
             "module": "Loaders",
             "namespace": "",
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 46,
+            "line": 47,
             "description": "Objectloader can be used to load external objects from files.\n\nAlso loads all resources attached to the objects being loaded.\n\nCan parse be used to load on runtime resources and objects from external project files."
         },
         "TextureLoader": {
@@ -2735,6 +2745,21 @@
             "description": "LensFlare object can be used to simulate lens flare from lights.\n\nStores a list of Flares.\n\nFor optimal result LensFlare object should be attached to a light source.\n\nWorks with perspective and orthographic cameras.",
             "extends": "{Object3D}",
             "author": "tentone"
+        },
+        "Measurement": {
+            "name": "Measurement",
+            "shortname": "Measurement",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Misc",
+            "namespace": "",
+            "file": "source\\core\\objects\\misc\\Measurement.js",
+            "line": 4,
+            "description": "Measurement object draws a line between two points and displays the distance value.",
+            "extends": "{Group}"
         },
         "Sky": {
             "name": "Sky",
@@ -7787,7 +7812,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 67,
+            "line": 68,
             "description": "Load object file from URL.",
             "itemtype": "method",
             "name": "load",
@@ -7818,7 +7843,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 91,
+            "line": 92,
             "description": "Parse JSON object and create the correct Object structure.\n\nData can be loaded from a file and should be parsed into Object.",
             "itemtype": "method",
             "name": "parse",
@@ -7843,7 +7868,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 134,
+            "line": 135,
             "description": "Define base path for external texture loading.",
             "itemtype": "method",
             "name": "setTexturePath",
@@ -7859,7 +7884,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 145,
+            "line": 146,
             "description": "Set cross origin.",
             "itemtype": "method",
             "name": "setCrossOrigin",
@@ -7875,7 +7900,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 156,
+            "line": 157,
             "description": "Parse resources on JSON.",
             "itemtype": "method",
             "name": "parseResources",
@@ -7895,7 +7920,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 181,
+            "line": 182,
             "description": "Parse geometries on JSON.",
             "itemtype": "method",
             "name": "parseShape",
@@ -7915,7 +7940,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 202,
+            "line": 203,
             "description": "Parse geometries on JSON.",
             "itemtype": "method",
             "name": "parseGeometries",
@@ -7935,7 +7960,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 226,
+            "line": 227,
             "description": "Parse materials on json.",
             "itemtype": "method",
             "name": "parseMaterials",
@@ -7955,7 +7980,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 249,
+            "line": 250,
             "description": "Parse images on json.",
             "itemtype": "method",
             "name": "parseImages",
@@ -7975,7 +8000,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 270,
+            "line": 271,
             "description": "Parse videos on json.",
             "itemtype": "method",
             "name": "parseVideos",
@@ -7995,7 +8020,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 291,
+            "line": 292,
             "description": "Parse audio on json.",
             "itemtype": "method",
             "name": "parseAudio",
@@ -8015,7 +8040,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 312,
+            "line": 313,
             "description": "Parse fonts on json.",
             "itemtype": "method",
             "name": "parseFonts",
@@ -8035,7 +8060,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 333,
+            "line": 334,
             "description": "Parse textures on json.",
             "itemtype": "method",
             "name": "parseTextures",
@@ -8055,7 +8080,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 357,
+            "line": 358,
             "description": "Parse array of skeletons from JSON object.",
             "itemtype": "method",
             "name": "parseSkeletons",
@@ -8076,7 +8101,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 377,
+            "line": 378,
             "description": "Auxiliar method to bind skeletons to loaded objects.\n\nLook for skeletonUUID property, wich is a placeholder with the skeleton UUID and replace it with the skeleton object.",
             "itemtype": "method",
             "name": "bindSkeletons",
@@ -8092,7 +8117,7 @@
         },
         {
             "file": "source\\core\\loaders\\ObjectLoader.js",
-            "line": 407,
+            "line": 408,
             "description": "Parse objects from json data,",
             "itemtype": "method",
             "name": "parseObjects",

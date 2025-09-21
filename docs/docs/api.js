@@ -61,6 +61,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "Material",
         "MaterialLoader",
         "MathUtils",
+        "Measurement",
         "Mesh",
         "Model",
         "Mouse",
