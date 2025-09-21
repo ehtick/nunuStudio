@@ -501,6 +501,7 @@ var LocaleEN = {
 	toggleSnapToGrid: "Toggle Snap to Grid",
 	scene: "Scene",
 	move: "Move",
+	measure: "Measure",
 	play: "Play",
 	selectObjects: "Select Objects",
 	calculateProbe: "Calculate Light",
@@ -556,6 +557,7 @@ var LocaleEN = {
 	selectObjectEditAnimation: "Select an object to edit animation.",
 	nothingToShow: "Select an object to view its properties.",
 	selectObjectFirst: "Need to select an object first before performing this operation.",
+	selectMeasurementPoints: "Select two points in the scene to create a measurement.",
 
 	// Errors
 	errorExportingProject: "Error exporting project",

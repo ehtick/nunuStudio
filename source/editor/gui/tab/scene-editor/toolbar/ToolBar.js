@@ -56,6 +56,10 @@ function ToolBar(parent)
 	{
 		self.parent.selectTool(SceneEditor.ROTATE);
 	});
+	this.measure = tool.addToggleOption(Locale.measure + " (CTRL+5)", Global.FILE_PATH + "icons/misc/ruler.png", function()
+	{
+		self.parent.selectTool(SceneEditor.MEASURE);
+	});
 
 	var zoom = this.addGroup();
 	this.zoom = zoom.addOption(Locale.focusObject + " (CTRL+F)", Global.FILE_PATH + "icons/misc/focus.png", function()
@@ -74,6 +78,7 @@ ToolBar.prototype.selectTool = function(tool)
 	this.move.setSelected(tool === SceneEditor.MOVE);
 	this.scale.setSelected(tool === SceneEditor.SCALE);
 	this.rotate.setSelected(tool === SceneEditor.ROTATE);
+	this.measure.setSelected(tool === SceneEditor.MEASURE);
 };
 
 /**
