@@ -1,4 +1,4 @@
-import {DefaultLoadingManager, FileLoader, ObjectLoader} from "three";
+import {BufferGeometry, DefaultLoadingManager, FileLoader, ObjectLoader} from "three";
 import {TerrainBufferGeometry} from "../geometries/TerrainBufferGeometry.js";
 import {RoundedBoxBufferGeometry} from "../geometries/RoundedBoxBufferGeometry.js";
 import {CapsuleBufferGeometry} from "../geometries/CapsuleBufferGeometry.js";
@@ -99,11 +99,20 @@ GeometryLoader.prototype.parse = function(data)
 
 	else
 	{
-		var geometries = ObjectLoader.prototype.parseGeometries([data], this.shapes);
-		for (var i in geometries)
+		try
 		{
-			geometry = geometries[i];
-			break;
+			var geometries = ObjectLoader.prototype.parseGeometries([data], this.shapes);
+			for (var i in geometries)
+			{
+				geometry = geometries[i];
+				break;
+			}
+		}
+		catch (e)
+		{
+			console.warn("nunuStudio: Failed to parse geometry", data.type, data.uuid, e);
+
+			geometry = new BufferGeometry();
 		}
 	}
 
