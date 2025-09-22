@@ -34,7 +34,7 @@ function OrientationCube()
 
 	// Raycaster
 	this.raycaster = new Raycaster();
-	this.normalized = new Vector2(0, 0);
+	this.rayPointer = {position: new Vector2(0, 0)};
 
 	// Scene
 	this.scene = new Scene();
@@ -120,9 +120,23 @@ OrientationCube.Z_NEG = 5;
  */
 OrientationCube.prototype.raycast = function(mouse, canvas)
 {
-	if (this.viewport.isInside(canvas, mouse))
+	var pointer = mouse;
+
+	if (canvas !== undefined && canvas !== null && canvas.clientWidth !== 0 && canvas.clientHeight !== 0)
 	{
-		this.raycaster.setFromCamera(this.viewport.getNormalized(canvas, mouse), this.camera);
+		var ratioX = canvas.width / canvas.clientWidth;
+		var ratioY = canvas.height / canvas.clientHeight;
+
+		if (ratioX !== 1 || ratioY !== 1)
+		{
+			this.rayPointer.position.set(mouse.position.x * ratioX, mouse.position.y * ratioY);
+			pointer = this.rayPointer;
+		}
+	}
+
+	if (this.viewport.isInside(canvas, pointer))
+	{
+		this.raycaster.setFromCamera(this.viewport.getNormalized(canvas, pointer), this.camera);
 
 		var intersects = this.raycaster.intersectObjects(this.scene.children, true);
 		if (intersects.length > 0)
