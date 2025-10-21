@@ -39,7 +39,8 @@ function MaterialAsset(parent)
 	this.materialHighlighted = false;
 
 	// Material Preview
-	this.image = document.createElement("img");
+        this.image = document.createElement("img");
+        this.image.draggable = false;
 	this.image.style.position = "absolute";
 	this.image.style.top = "5%";
 	this.image.style.left = "17%";
